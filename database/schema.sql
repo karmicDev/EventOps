@@ -6,7 +6,8 @@ DROP TABLE IF EXISTS Event;
 CREATE TABLE Event (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL CHECK(length(trim(name)) > 0),
-    starts_at TEXT NOT NULL CHECK(starts_at IS date(starts_at))
+    starts_at TEXT NOT NULL CHECK(starts_at IS date(starts_at)),
+    location TEXT NOT NULL DEFAULT 'Unknown' CHECK(length(trim(location)) > 0)
 );
 
 CREATE TABLE "Order" (
