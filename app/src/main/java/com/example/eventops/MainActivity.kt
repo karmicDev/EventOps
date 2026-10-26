@@ -12,11 +12,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventops.ui.theme.EventOpsTheme
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val database = DatabaseProvider.getDatabase(this)
+        val eventDao = database.eventDao()
+        lifecycleScope.launch {
+
+            val newIds = eventDao.insert(DataHelper.createEvents())
+            println("Inserted event with ID: $newIds")
+
+            val events = eventDao.getAll()
+            println("Events in database: $events")
+        }
         setContent {
             EventOpsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
