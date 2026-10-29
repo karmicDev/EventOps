@@ -4,16 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.eventops.ui.theme.EventOpsTheme
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.combine
+import com.example.eventops.ui.theme.EventOpsTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -22,28 +32,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val database = DatabaseProvider.getDatabase(this)
         val eventDao = database.eventDao()
+        val factory = EventViewModelFactory(eventDao)
+
+        val eventViewModel = ViewModelProvider(
+            this,
+            factory
+        )[EventViewModel::class.java]
+
         lifecycleScope.launch {
-            //val deleteCount = eventDao.deleteAll()
-            //println("Deleted Events count: $deleteCount")
-           // eventDao.deleteAll()
-           //eventDao.insert(DataHelper.createEvents())
-
-            val berlinFlow = eventDao.observeEventsForLocation("Berlin")
-            val hamburgFlow = eventDao.observeEventsForLocation("Hamburg")
-
-            combine(berlinFlow, hamburgFlow) { berlin, hamburg ->
-                CityEvents(berlin, hamburg)
-            }.collect { result ->
-                println("Berlin: ${result.berlin.size}")
-                println("Hamburg: ${result.hamburg.size}")
+            //eventDao.insert(DataHelper.createEvents())
+            eventViewModel.berlinEvents.collect { events ->
+                println("Berlin: ${events.size}")
             }
-
         }
+
         setContent {
             EventOpsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                val events by eventViewModel.berlinEvents
+                    .collectAsStateWithLifecycle()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
+                    EventList(
+                        events = events,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -51,6 +63,42 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+@Composable
+fun EventList(
+    events: List<Event>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = events,
+            key = { event -> event.id }
+        ) { event ->
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = event.name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text("ID: ${event.id}")
+                    Text("Startdatum: ${event.startsAt}")
+                    Text("Ort: ${event.location}")
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
