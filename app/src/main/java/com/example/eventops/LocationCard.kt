@@ -1,5 +1,6 @@
 package com.example.eventops
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -12,11 +13,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LocationCard(
     location: Location,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Card(modifier = modifier) {
         Column(
             modifier = Modifier.padding(16.dp)
+                .clickable(onClick = onClick)
         ) {
             Text(
                 text = location.name,

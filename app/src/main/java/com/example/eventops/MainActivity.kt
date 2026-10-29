@@ -43,31 +43,21 @@ class MainActivity : ComponentActivity() {
             locationViewModelFactory
         )[LocationViewModel::class.java]
 
-        lifecycleScope.launch {
-            val locations = database.locationDao().getAll()
-            val firstLocation = locations.firstOrNull()
-
-            if (firstLocation != null) {
-                eventViewModel
-                    .observeEventsForLocation(firstLocation.id)
-                    .collect { events ->
-                        println("${firstLocation.name}: ${events.size}")
-                    }
-            }
-        }
-
         setContent {
             EventOpsTheme {
-                val eventsFlow = remember {
-                    eventViewModel.observeEventsForLocation(1)
+                val locationsFlow = remember {
+                    locationViewModel.locations
                 }
-                val events by eventsFlow.collectAsStateWithLifecycle()
+                val locations by locationsFlow.collectAsStateWithLifecycle()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    EventList(
-                        events = events,
+                    LocationList(
+                        locations = locations,
+                        onLocationClick = { location ->
+                            println("Selected location: ${location.name}, ID: ${location.id}")
+                        },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -89,22 +79,5 @@ private fun MainActivity.insertTestData(database: EventDatabase) {
             locationIds = locationIds
         )
         eventDao.insert(events)
-    }
-}
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EventOpsTheme {
-        Greeting("Android")
     }
 }

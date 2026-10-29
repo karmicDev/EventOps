@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LocationList(
     locations: List<Location>,
+    onLocationClick: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -27,6 +28,7 @@ fun LocationList(
         ) { location ->
             LocationCard(
                 location = location,
+                onClick = { onLocationClick(location) },
                 modifier = Modifier.fillMaxWidth()
             )
         }
