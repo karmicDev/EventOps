@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eventops.ui.theme.EventOpsTheme
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -22,12 +23,21 @@ class MainActivity : ComponentActivity() {
         val database = DatabaseProvider.getDatabase(this)
         val eventDao = database.eventDao()
         lifecycleScope.launch {
+            //val deleteCount = eventDao.deleteAll()
+            //println("Deleted Events count: $deleteCount")
+           // eventDao.deleteAll()
+           //eventDao.insert(DataHelper.createEvents())
 
-            val newIds = eventDao.insert(DataHelper.createEvents())
-            println("Inserted event with ID: $newIds")
+            val berlinFlow = eventDao.observeEventsForLocation("Berlin")
+            val hamburgFlow = eventDao.observeEventsForLocation("Hamburg")
 
-            val events = eventDao.getAll()
-            println("Events in database: $events")
+            combine(berlinFlow, hamburgFlow) { berlin, hamburg ->
+                CityEvents(berlin, hamburg)
+            }.collect { result ->
+                println("Berlin: ${result.berlin.size}")
+                println("Hamburg: ${result.hamburg.size}")
+            }
+
         }
         setContent {
             EventOpsTheme {

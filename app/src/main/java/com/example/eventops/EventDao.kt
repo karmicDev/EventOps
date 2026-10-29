@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Insert
+import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventDao {
@@ -41,6 +43,36 @@ interface EventDao {
     @Delete
     suspend fun delete(events: List<Event>): Int
 
+    @Query("DELETE FROM Event")
+    suspend fun deleteAll(): Int
+
     @Query("DELETE FROM Event WHERE id = :id")
     suspend fun deleteById(id: Int): Int
+
+    @Query("SELECT * FROM Event WHERE location = :location")
+    suspend fun getEventsForLocation(location: String): List<Event>
+
+    @Query("SELECT COUNT(*) FROM Event WHERE location = :location")
+    suspend fun countEventsForLocation(location: String): Int
+
+    @Query("SELECT * FROM Event WHERE location = :location")
+    fun observeEventsForLocation(location: String): Flow<List<Event>>
+
+    @Transaction
+    suspend fun deleteTwoEvents(id1: Int, id2: Int) {
+        val deletedFirst = deleteById(id1)
+        val deletedSecond = deleteById(id2)
+
+        check(deletedFirst == 1 && deletedSecond == 1) {
+            "Both events must exist and be deleted."
+        }
+    }
+
+    @Transaction
+    suspend fun getEventSummary(location: String): EventSummary {
+        val events = getEventsForLocation(location)
+        val count = countEventsForLocation(location)
+
+        return EventSummary(events, count)
+    }
 }
