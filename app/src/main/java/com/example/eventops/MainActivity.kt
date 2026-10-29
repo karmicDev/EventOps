@@ -66,41 +66,6 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun EventList(
-    events: List<Event>,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(
-            items = events,
-            key = { event -> event.id }
-        ) { event ->
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = event.name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text("ID: ${event.id}")
-                    Text("Startdatum: ${event.startsAt}")
-                    Text("Ort: ${event.location}")
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
         text = "Hello $name!",
