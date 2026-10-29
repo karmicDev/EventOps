@@ -18,8 +18,9 @@ fun LocationCard(
 ) {
     Card(modifier = modifier) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
                 .clickable(onClick = onClick)
+                .padding(16.dp)
         ) {
             Text(
                 text = location.name,

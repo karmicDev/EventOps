@@ -2,21 +2,22 @@ package com.example.eventops
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.example.eventops.ui.theme.EventOpsTheme
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
         val locationViewModelFactory = LocationViewModelFactory(locationDao)
 
 
-        insertTestData(database)
+       // insertTestData(database)
 
         val eventViewModel = ViewModelProvider(
             this,
@@ -44,22 +45,44 @@ class MainActivity : ComponentActivity() {
         )[LocationViewModel::class.java]
 
         setContent {
+            var selectedLocation by remember {
+                mutableStateOf<Location?>(null)
+            }
             EventOpsTheme {
+                BackHandler(enabled = selectedLocation != null) {
+                    selectedLocation = null
+                }
+
                 val locationsFlow = remember {
                     locationViewModel.locations
                 }
                 val locations by locationsFlow.collectAsStateWithLifecycle()
 
+                val eventsFlow = remember(selectedLocation?.id) {
+                    selectedLocation?.let { location ->
+                        eventViewModel.observeEventsForLocation(location.id)
+                    }
+                }
+                val events by (eventsFlow ?: flowOf(emptyList()))
+                    .collectAsStateWithLifecycle(initialValue = emptyList())
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    LocationList(
-                        locations = locations,
-                        onLocationClick = { location ->
-                            println("Selected location: ${location.name}, ID: ${location.id}")
-                        },
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    if (selectedLocation == null) {
+                        LocationList(
+                            locations = locations,
+                            onLocationClick = { location ->
+                                selectedLocation = location
+                            },
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    } else {
+                        EventList(
+                            events = events,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                 }
             }
         }
