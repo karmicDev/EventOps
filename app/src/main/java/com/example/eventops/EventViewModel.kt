@@ -8,22 +8,16 @@ import kotlinx.coroutines.flow.stateIn
 
 class EventViewModel(
     private val eventDao: EventDao
-): ViewModel() {
+) : ViewModel() {
 
-    fun observeEventsForLocation(location: String): StateFlow<List<Event>> {
-        return eventDao.observeEventsForLocation(location)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
-    }
-
-    val berlinEvents: StateFlow<List<Event>> =
-        eventDao.observeEventsForLocation("Berlin")
+    fun observeEventsForLocation(
+        locationId: Int
+    ): StateFlow<List<Event>> {
+        return eventDao.observeEventsForLocation(locationId)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList()
             )
+    }
 }

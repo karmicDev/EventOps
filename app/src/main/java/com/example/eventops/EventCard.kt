@@ -25,7 +25,6 @@ fun EventCard(
             )
             Text("ID: ${event.id}")
             Text("Startdatum: ${event.startsAt}")
-            Text("Ort: ${event.location}")
         }
     }
 }
@@ -34,7 +33,7 @@ fun EventCard(
 @Composable
 fun EventCardPreview() {
     EventCard(
-        event = Event(id = 1, name = "Test", startsAt = "2023-01-01", location = "Testort"),
+        event = Event(id = 1, name = "Test", startsAt = "2023-01-01", locationId = 1001),
         modifier = Modifier.padding(16.dp)
     )
 }

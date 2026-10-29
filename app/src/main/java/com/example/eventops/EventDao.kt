@@ -49,14 +49,14 @@ interface EventDao {
     @Query("DELETE FROM Event WHERE id = :id")
     suspend fun deleteById(id: Int): Int
 
-    @Query("SELECT * FROM Event WHERE location = :location")
-    suspend fun getEventsForLocation(location: String): List<Event>
+    @Query("SELECT * FROM Event WHERE locationId = :locationId")
+    suspend fun getEventsForLocation(locationId: Int): List<Event>
 
-    @Query("SELECT COUNT(*) FROM Event WHERE location = :location")
-    suspend fun countEventsForLocation(location: String): Int
+    @Query("SELECT COUNT(*) FROM Event WHERE locationId = :locationId")
+    suspend fun countEventsForLocation(locationId: Int): Int
 
-    @Query("SELECT * FROM Event WHERE location = :location")
-    fun observeEventsForLocation(location: String): Flow<List<Event>>
+    @Query("SELECT * FROM Event WHERE locationId = :locationId")
+    fun observeEventsForLocation(locationId: Int): Flow<List<Event>>
 
     @Transaction
     suspend fun deleteTwoEvents(id1: Int, id2: Int) {
@@ -69,9 +69,9 @@ interface EventDao {
     }
 
     @Transaction
-    suspend fun getEventSummary(location: String): EventSummary {
-        val events = getEventsForLocation(location)
-        val count = countEventsForLocation(location)
+    suspend fun getEventSummary(locationId: Int): EventSummary {
+        val events = getEventsForLocation(locationId)
+        val count = countEventsForLocation(locationId)
 
         return EventSummary(events, count)
     }

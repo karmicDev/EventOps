@@ -3,7 +3,26 @@ package com.example.eventops
 import kotlin.random.Random
 
 object DataHelper {
-    fun createEvents(numEvents: Int = 10000): List<Event> {
+
+    fun getLocations(): List<Location> {
+        return listOf(
+            Location(name = "Berlin"),
+            Location(name = "Hamburg"),
+            Location(name = "München"),
+            Location(name = "Köln"),
+            Location(name = "Frankfurt"),
+            Location(name = "Stuttgart"),
+            Location(name = "Düsseldorf"),
+            Location(name = "Dortmund"),
+            Location(name = "Essen"),
+            Location(name = "Leipzig")
+        )
+    }
+    fun createEvents(numEvents: Int = 10000, locationIds: List<Long>): List<Event> {
+        require(locationIds.isNotEmpty()) {
+            "At least one location ID is required."
+        }
+
         val events = mutableListOf<Event>()
 
         for (i in 1..numEvents) {
@@ -11,7 +30,7 @@ object DataHelper {
                 Event(
                     name = getEventName(index = i),
                     startsAt = getEventDate(),
-                    location = getEventLcation()
+                    locationId = locationIds.random().toInt()
                 )
             )
         }
@@ -22,20 +41,6 @@ object DataHelper {
         val month = Random.nextInt(1, 13)
         val day = Random.nextInt(1, 29)
         return String.format("%04d-%02d-%02d", year, month, day)
-    }
-
-    private fun getEventLcation() : String {
-        return listOf(
-            "Berlin",
-            "Hamburg",
-            "München",
-            "Köln",
-            "Frankfurt",
-            "Stuttgart",
-            "Düsseldorf",
-            "Dortmund",
-            "Essen",
-            "Leipzig").random()
     }
 
     private fun getEventName(index: Int): String {

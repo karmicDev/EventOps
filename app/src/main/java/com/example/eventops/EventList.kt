@@ -41,7 +41,7 @@ fun EventList(
 @Preview(showBackground = true)
 @Composable
 fun EventListPreview() {
-    val events = DataHelper.createEvents(10)
+    val events = DataHelper.createEvents(10, locationIds = listOf(1, 2, 3))
     EventList(
         events = events,
         modifier = Modifier.padding(16.dp)

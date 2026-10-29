@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,22 +35,32 @@ class MainActivity : ComponentActivity() {
         val eventDao = database.eventDao()
         val factory = EventViewModelFactory(eventDao)
 
+        insertTestData(database)
+
         val eventViewModel = ViewModelProvider(
             this,
             factory
         )[EventViewModel::class.java]
 
         lifecycleScope.launch {
-            //eventDao.insert(DataHelper.createEvents())
-            eventViewModel.berlinEvents.collect { events ->
-                println("Berlin: ${events.size}")
+            val locations = database.locationDao().getAll()
+            val firstLocation = locations.firstOrNull()
+
+            if (firstLocation != null) {
+                eventViewModel
+                    .observeEventsForLocation(firstLocation.id)
+                    .collect { events ->
+                        println("${firstLocation.name}: ${events.size}")
+                    }
             }
         }
 
         setContent {
             EventOpsTheme {
-                val events by eventViewModel.berlinEvents
-                    .collectAsStateWithLifecycle()
+                val eventsFlow = remember {
+                    eventViewModel.observeEventsForLocation(1)
+                }
+                val events by eventsFlow.collectAsStateWithLifecycle()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
@@ -61,6 +72,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+}
+
+private fun MainActivity.insertTestData(database: EventDatabase) {
+    lifecycleScope.launch {
+        val locationDao = database.locationDao()
+        val eventDao = database.eventDao()
+
+        val locations = DataHelper.getLocations()
+        val locationIds = locationDao.insert(locations)
+
+        val events = DataHelper.createEvents(
+            numEvents = 10_000,
+            locationIds = locationIds
+        )
+        eventDao.insert(events)
     }
 }
 
