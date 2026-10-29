@@ -4,15 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,14 +25,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val database = DatabaseProvider.getDatabase(this)
         val eventDao = database.eventDao()
-        val factory = EventViewModelFactory(eventDao)
+        val locationDao = database.locationDao()
+
+        val eventViewModelFactory = EventViewModelFactory(eventDao)
+        val locationViewModelFactory = LocationViewModelFactory(locationDao)
+
 
         insertTestData(database)
 
         val eventViewModel = ViewModelProvider(
             this,
-            factory
+            eventViewModelFactory
         )[EventViewModel::class.java]
+
+        val locationViewModel = ViewModelProvider(
+            this,
+            locationViewModelFactory
+        )[LocationViewModel::class.java]
 
         lifecycleScope.launch {
             val locations = database.locationDao().getAll()
