@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -27,7 +28,7 @@ fun EventList(
     ) {
         items(
             items = events,
-            key = { event -> event.id }
+            key = { event -> if (event.id != 0) event.id else event.name }
         ) { event ->
             EventCard(
                 event = event,
@@ -35,4 +36,14 @@ fun EventList(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EventListPreview() {
+    val events = DataHelper.createEvents(10)
+    EventList(
+        events = events,
+        modifier = Modifier.padding(16.dp)
+    )
 }
